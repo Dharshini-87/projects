@@ -1,0 +1,64 @@
+import os
+from tkinter import Tk, Label, Button, filedialog
+from PIL import Image, ImageTk
+
+class ImageViewer:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Image Viewer")
+
+        self.image_label = Label(self.root)
+        self.image_label.pack()
+
+        self.btn_prev = Button(self.root, text="<< Previous", command=self.show_prev_image)
+        self.btn_prev.pack(side="left")
+
+        self.btn_next = Button(self.root, text="Next >>", command=self.show_next_image)
+        self.btn_next.pack(side="right")
+
+        self.btn_exit = Button(self.root, text="Exit", command=root.quit)
+        self.btn_exit.pack(side="bottom")
+
+        self.images = []
+        self.current_index = 0
+
+        self.load_images()
+
+    def load_images(self):
+        folder_selected = filedialog.askdirectory(title="Select Folder with Images")
+        if folder_selected:
+            supported_formats = ('.jpg', '.jpeg', '.png', '.bmp')
+            self.images = [
+                os.path.join(folder_selected, f)
+                for f in os.listdir(folder_selected)
+                if f.lower().endswith(supported_formats)
+            ]
+            if self.images:
+                self.show_image(self.current_index)
+            else:
+                self.image_label.config(text="No supported image files found.")
+
+    def show_image(self, index):
+        try:
+            img = Image.open(self.images[index])
+            img.thumbnail((500, 500))
+            photo = ImageTk.PhotoImage(img)
+            self.image_label.config(image=photo)
+            self.image_label.image = photo
+        except Exception as e:
+            self.image_label.config(text=f"Error loading image: {e}")
+
+    def show_next_image(self):
+        if self.images:
+            self.current_index = (self.current_index + 1) % len(self.images)
+            self.show_image(self.current_index)
+
+    def show_prev_image(self):
+        if self.images:
+            self.current_index = (self.current_index - 1) % len(self.images)
+            self.show_image(self.current_index)
+
+if __name__ == "__main__":
+    root = Tk()
+    app = ImageViewer(root)
+    root.mainloop()
