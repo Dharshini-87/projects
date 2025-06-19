@@ -1,0 +1,85 @@
+# Fake News Detection using Machine Learning and FastAPI
+
+import pandas as pd
+import numpy as np
+import re
+import nltk
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_auc_score
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+# Ensure stopwords are downloaded once
+nltk.download('stopwords')
+
+# Generate Synthetic Dataset
+def generate_synthetic_data():
+    data = {
+        'text': [
+            'Breaking news: government announces new policy to boost economy',
+            'Celebrity caught in scandal, shocking details revealed',
+            'Scientists discover new species in the Amazon rainforest',
+            'Fake news alert: Alien invasion reported in downtown New York',
+            'Doctors warn about dangerous new virus spreading rapidly',
+            'Social media hoax: Free iPhones being given away at local mall'
+        ],
+        'label': [1, 0, 1, 0, 1, 0]  # 1 for real, 0 for fake
+    }
+    return pd.DataFrame(data)
+
+# Text Preprocessing Function
+def preprocess_text(text):
+    text = re.sub(r'[^a-zA-Z]', ' ', text)
+    text = text.lower()
+    words = text.split()
+    ps = PorterStemmer()
+    words = [ps.stem(word) for word in words if word not in stopwords.words('english')]
+    return ' '.join(words)
+
+# Load Synthetic Dataset
+data = generate_synthetic_data()
+data['text'] = data['text'].apply(preprocess_text)
+
+# Feature Extraction
+vectorizer = TfidfVectorizer(max_features=5000)
+X = vectorizer.fit_transform(data['text']).toarray()
+y = data['label']
+
+# Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model Training
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# Model Evaluation
+y_pred = model.predict(X_test)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("ROC-AUC Score:", roc_auc_score(y_test, y_pred))
+
+# FastAPI setup
+app = FastAPI()
+
+# Request model for input validation
+class NewsRequest(BaseModel):
+    text: str
+
+@app.post("/predict")
+async def predict(news: NewsRequest):
+    if not news.text:
+        raise HTTPException(status_code=400, detail="No text provided")
+    processed_news = preprocess_text(news.text)
+    vectorized_news = vectorizer.transform([processed_news]).toarray()
+    prediction = model.predict(vectorized_news)[0]
+    return {"prediction": "real" if prediction == 1 else "fake"}
+
+if __name__ == '__main__':
+    import uvicorn
+    print("Starting FastAPI server...")
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
