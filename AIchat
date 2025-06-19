@@ -1,0 +1,65 @@
+def definition_of_ai():
+    print("\nDefinition of AI:")
+    print("AI enables machines to 'think' and 'learn' from data, allowing them to perform tasks that usually require human intelligence.")
+
+def types_of_ai():
+    print("\nTypes of AI:")
+    print("Based on Functionality: Reactive Machine, Limited Memory, Theory of Mind, Self-aware")
+    print("Based on Capabilities: Narrow AI, General AI, Super AI")
+
+def core_concepts():
+    print("\nCore Concepts of AI:")
+    print("Machine Learning (ML), Deep Learning, NLP, Neural Networks, Computer Vision, Time Series Analysis")
+
+def applications():
+    print("\nApplications of AI:")
+    print("- Healthcare: Diagnosis, Robotic surgery")
+    print("- Finance: Algorithmic trading, Fraud detection")
+    print("- Automotive: Self-driving cars")
+    print("- Education: Personalized learning")
+    print("- Entertainment: Recommendation systems")
+    print("- Social Media: Face/friend recognition")
+    print("- Voice Tech: Speech recognition")
+
+def advantages():
+    print("\nAdvantages of AI:")
+    print("- Automation and Efficiency")
+    print("- Data Analysis and Decision Making")
+    print("- Personalization and 24/7 Availability")
+    print("- Innovation and Improved Security")
+
+def disadvantages():
+    print("\nDisadvantages of AI:")
+    print("- Job Displacement")
+    print("- High Costs and Dependency")
+    print("- Lack of Creativity and Emotions")
+    print("- Ethical Concerns")
+
+def main():
+    options = {
+        "1": ("Definition of AI", definition_of_ai),
+        "2": ("Types of AI", types_of_ai),
+        "3": ("Core Concepts of AI", core_concepts),
+        "4": ("Applications", applications),
+        "5": ("Advantages", advantages),
+        "6": ("Disadvantages", disadvantages),
+        "7": ("Exit", None)
+    }
+
+    while True:
+        print("\n--- Artificial Intelligence Overview ---")
+        for key in sorted(options):
+            print(f"{key}. {options[key][0]}")
+
+        choice = input("Select a topic to explore (1-7): ")
+
+        if choice == "7":
+            print("Thanks for exploring AI!")
+            break
+        elif choice in options:
+            options[choice][1]()
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
